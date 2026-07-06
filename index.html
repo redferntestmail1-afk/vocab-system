@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Vocabulary System</title>
+
+<style>
+body { font-family: Arial; margin:20px; background:#f6f7fb; }
+.card {
+    background:white;
+    padding:14px;
+    margin:10px 0;
+    border-radius:12px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+.word { font-size:18px; font-weight:bold; }
+.meaning { margin-top:6px; color:#333; }
+input { padding:8px; width:300px; margin-bottom:10px; }
+button { margin-right:8px; padding:6px 10px; border:none; border-radius:8px; }
+</style>
+
+</head>
+
+<body>
+
+<h2>📘 Vocabulary System (GitHub Step 1)</h2>
+
+<input id="search" placeholder="Search..." oninput="render()">
+
+<div id="list"></div>
+
+<script>
+
+//////////////////////////////////////////////////
+// 👉 先用小词库测试（下一步再换264个）
+//////////////////////////////////////////////////
+
+const words = [
+  "Microwave Oven",
+  "Vortex mixer",
+  "Titrator",
+  "pH meter",
+  "Conductivity meter"
+];
+
+//////////////////////////////////////////////////
+
+let dict = JSON.parse(localStorage.getItem("dict") || "{}");
+
+function saveDict(){
+    localStorage.setItem("dict", JSON.stringify(dict));
+}
+
+function getMeaning(w){
+    return dict[w] || "（点击添加释义）";
+}
+
+function speak(t){
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = "en-US";
+    speechSynthesis.speak(u);
+}
+
+function render(){
+
+    const q = document.getElementById("search").value?.toLowerCase() || "";
+    const list = document.getElementById("list");
+
+    list.innerHTML = "";
+
+    words
+    .filter(w => w.toLowerCase().includes(q))
+    .forEach(w => {
+
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <div class="word">${w}</div>
+            <div class="meaning">📘 ${getMeaning(w)}</div>
+            <button>🔊 发音</button>
+            <button>✏️ 添加释义</button>
+        `;
+
+        const btns = div.querySelectorAll("button");
+
+        btns[0].onclick = () => speak(w);
+
+        btns[1].onclick = () => {
+            const val = prompt("输入释义：", dict[w] || "");
+            if(val){
+                dict[w] = val;
+                saveDict();
+                render();
+            }
+        };
+
+        list.appendChild(div);
+    });
+}
+
+render();
+
+</script>
+
+</body>
+</html>
